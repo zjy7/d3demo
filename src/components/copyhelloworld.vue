@@ -23,7 +23,7 @@ export default {
       this.$nextTick(_ => {
         var svg = null;
         var circle = null;
-        // var circleTransition = null;
+        var circleTransition = null;
         var latestBeat = null;
         var insideBeat = false;
         var data = [];
@@ -32,13 +32,17 @@ export default {
         var BEAT_TIME = 400;
         var TICK_FREQUENCY = SECONDS_SAMPLE * 1000 / BEAT_TIME;
         var BEAT_VALUES = [0, 0, 3, -4, 10, -7, 3, 0, 0];
-        var BEAT_2_VALUES = [0, 0, 3, -4, 10, -4, 3, 0, 0];
-        var BEAT_2_VALUES = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-        console.log('BEAT_VALUES')
-        console.log(BEAT_VALUES)
+
         var CIRCLE_FULL_RADIUS = 40;
         var MAX_LATENCY = 5000;
         debugger
+        var colorScale = d3.scaleLinear()
+          .domain([BEAT_TIME, (MAX_LATENCY - BEAT_TIME) / 2, MAX_LATENCY])
+          .range(["#6D9521", "#D77900", "#CD3333"]);
+
+        var radiusScale = d3.scaleLinear()
+          .range([5, CIRCLE_FULL_RADIUS])
+          .domain([MAX_LATENCY, BEAT_TIME]);
 
         function beat() {
 
@@ -58,29 +62,20 @@ export default {
           });
 
           var step = BEAT_TIME / BEAT_VALUES.length - 2;
-          let boolean = Math.random().toFixed()==='0'
           for (var i = 1; i < BEAT_VALUES.length; i++) {
             data.push({
               date: new Date(nowTime + i * step),
-              value: boolean?BEAT_VALUES[i]:BEAT_2_VALUES[i]
+              value: BEAT_VALUES[i]
             });
           }
 
-          // var step = BEAT_TIME / BEAT_2_VALUES.length - 2;
-          // for (var i = 1; i < BEAT_2_VALUES.length; i++) {
-          //   data.push({
-          //     date: new Date(nowTime + i * step),
-          //     value: BEAT_2_VALUES[i]
-          //   });
-          // }
-
           latestBeat = now;
-          /*
+
           circleTransition = circle.transition()
             .duration(BEAT_TIME)
             .attr("r", CIRCLE_FULL_RADIUS)
             .attr("fill", "#6D9521");
-          */
+
           setTimeout(function () {
             insideBeat = false;
           }, BEAT_TIME);
@@ -90,14 +85,20 @@ export default {
         var margin = { left: 10, top: 10, right: CIRCLE_FULL_RADIUS * 3, bottom: 10 },
           width = svgWrapper.offsetWidth - margin.left - margin.right,
           height = svgWrapper.offsetHeight - margin.top - margin.bottom;
-          console.log(`height is: ${height}`)
-          // height = 500
+
         // create SVG
         svg = d3.select('#svg-wrapper').append("svg")
           .attr("width", width + margin.left + margin.right)
           .attr("height", height + margin.bottom + margin.top)
           .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        circle = svg
+          .append("circle")
+          .attr("fill", "#6D9521")
+          .attr("cx", width + margin.right / 2)
+          .attr("cy", height / 2)
+          .attr("r", CIRCLE_FULL_RADIUS);
 
         // init scales
         var now = new Date(),
@@ -115,20 +116,14 @@ export default {
           y = d3.scaleLinear()
             .domain([-10, 10])
             .range([height, 0]);
-        console.log('y')
-        console.log(y)
-        console.log('d3.curveBasis')
-        console.log(d3.curveBasis)
+
         var line = d3.line()
           .curve(d3.curveBasis)
           // .interpolate("basis")
           .x(function (d) {
-            // console.log(d)
             return x(d.date);
           })
           .y(function (d) {
-            // debugger
-            // console.log(d.value)
             return y(d.value);
           });
         var xAxis = d3.axisBottom(x)
@@ -192,29 +187,8 @@ export default {
           }).transition().on("start", tick);
         })();
 debugger
-        console.log('TICK_FREQUENCY')
-        console.log(TICK_FREQUENCY)
-        // requestAnimationFrame(function () {
-        //   // now = new Date();
-        //   // fromDate = new Date(now.getTime() - SECONDS_SAMPLE * 1000);
+        setInterval(function () {
 
-        //   // for (var i = 0; i < data.length; i++) {
-        //   //   if (data[i].date < fromDate) {
-        //   //     data.shift();
-        //   //   } else {
-        //   //     break;
-        //   //   }
-        //   // }
-        //   // console.log(insideBeat)
-        //   if (insideBeat) return;
-        //       data.shift();
-
-        //   data.push({
-        //     // date: now,
-        //     value: 0
-        //   });
-        // })
-        function si () {
           now = new Date();
           fromDate = new Date(now.getTime() - SECONDS_SAMPLE * 1000);
 
@@ -225,35 +199,28 @@ debugger
               break;
             }
           }
-          setTimeout(si,TICK_FREQUENCY)
-          // console.log(insideBeat)
+
           if (insideBeat) return;
 
           data.push({
             date: now,
             value: 0
           });
-        }
-        setTimeout(si,TICK_FREQUENCY)
-        // setInterval(function () {
-        //   now = new Date();
-        //   fromDate = new Date(now.getTime() - SECONDS_SAMPLE * 1000);
 
-        //   for (var i = 0; i < data.length; i++) {
-        //     if (data[i].date < fromDate) {
-        //       data.shift();
-        //     } else {
-        //       break;
-        //     }
-        //   }
-        //   // console.log(insideBeat)
-        //   if (insideBeat) return;
+          if (circleTransition != null) {
 
-        //   data.push({
-        //     date: now,
-        //     value: 0
-        //   });
-        // }, TICK_FREQUENCY);
+            var diff = now.getTime() - latestBeat.getTime();
+
+            if (diff < MAX_LATENCY) {
+              circleTransition = circle.transition()
+                .duration(TICK_FREQUENCY)
+                .attr("r", radiusScale(diff))
+                .attr("fill", colorScale(diff));
+            }
+          }
+
+
+        }, TICK_FREQUENCY);
 
         setInterval(function () {
           beat();
