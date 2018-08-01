@@ -38,7 +38,6 @@ export default {
         console.log(BEAT_VALUES)
         var CIRCLE_FULL_RADIUS = 40;
         var MAX_LATENCY = 5000;
-        debugger
 
         function beat() {
 
@@ -191,7 +190,6 @@ export default {
 
           }).transition().on("start", tick);
         })();
-debugger
         console.log('TICK_FREQUENCY')
         console.log(TICK_FREQUENCY)
         // requestAnimationFrame(function () {
