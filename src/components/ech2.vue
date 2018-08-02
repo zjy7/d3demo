@@ -49,13 +49,12 @@ export default {
                   type: 'category',
                   boundaryGap: true,
                   data: (function (){
-                      var now = new Date();
                       var res = [];
                       var len = 10;
                       while (len--) {
-                          res.unshift(now.toLocaleTimeString().replace(/^\D*/,''));
-                          now = new Date(now - 2000);
+                          res.push(10 - len - 1);
                       }
+                      console.log(res)
                       return res;
                   })()
               }
@@ -64,23 +63,25 @@ export default {
               {
                   type: 'value',
                   scale: true,
-                  name: '',
-                  max: 30,
+                  name: '预购量',
+                  max: 1200,
                   min: 0,
                   boundaryGap: [0.2, 0.2]
               }
           ],
           series: [
               {
-                  name:'最新成交价',
-                  type:'line',
+                  name:'预购队列',
+                  type:'bar',
+                  xAxisIndex: 0,
+                  yAxisIndex: 0,
                   data:(function (){
                       var res = [];
-                      var len = 0;
-                      while (len < 10) {
-                          res.push((Math.random()*10 + 5).toFixed(1) - 0);
-                          len++;
+                      var len = 10;
+                      while (len--) {
+                          res.push(Math.round(Math.random() * 1000));
                       }
+                      console.log(res)                      
                       return res;
                   })()
               }
@@ -89,20 +90,25 @@ export default {
       let myChart = echarts.init(document.getElementById('main'));
       myChart.setOption(option)
       console.log(app)
-      app.count = 11;
+      app.count = 9;
       setInterval(function (){
           console.log('setinterval')
           var axisData = (new Date()).toLocaleTimeString().replace(/^\D*/,'');
 
           var data0 = option.series[0].data;
+          // var data1 = option.series[1].data;
           data0.shift();
-          data0.push((Math.random() * 10 + 5).toFixed(1) - 0);
+          data0.push(Math.round(Math.random() * 1000));
+          // data1.shift();
+          // data1.push((Math.random() * 10 + 5).toFixed(1) - 0);
 
+          // option.xAxis[0].data.shift();
+          // option.xAxis[0].data.push(axisData);
           option.xAxis[0].data.shift();
-          option.xAxis[0].data.push(axisData);
+          option.xAxis[0].data.push(app.count++);
 
           myChart.setOption(option);
-      }, 1000);
+      }, 2100);
 
     }
   },

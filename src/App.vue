@@ -1,16 +1,17 @@
 <template>
   <div id="app">
-    <Ech />
+    <Ech2 />
   </div>
 </template>
 
 <script>
 import HelloWorld from './components/HelloWorld.vue'
 import Ech from './components/ech.vue'
+import Ech2 from './components/ech2.vue'
 export default {
   name: 'app',
   components: {
-    HelloWorld,Ech
+    HelloWorld,Ech,Ech2
   }
 }
 </script>

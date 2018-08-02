@@ -58,19 +58,53 @@ export default {
                       }
                       return res;
                   })()
+              },
+              {
+                  type: 'category',
+                  boundaryGap: true,
+                  data: (function (){
+                      var res = [];
+                      var len = 10;
+                      while (len--) {
+                          res.push(10 - len - 1);
+                      }
+                      return res;
+                  })()
               }
           ],
           yAxis: [
               {
                   type: 'value',
                   scale: true,
-                  name: '',
+                  name: '价格',
                   max: 30,
+                  min: 0,
+                  boundaryGap: [0.2, 0.2]
+              },
+              {
+                  type: 'value',
+                  scale: true,
+                  name: '预购量',
+                  max: 1200,
                   min: 0,
                   boundaryGap: [0.2, 0.2]
               }
           ],
           series: [
+              {
+                  name:'预购队列',
+                  type:'bar',
+                  xAxisIndex: 1,
+                  yAxisIndex: 1,
+                  data:(function (){
+                      var res = [];
+                      var len = 10;
+                      while (len--) {
+                          res.push(Math.round(Math.random() * 1000));
+                      }
+                      return res;
+                  })()
+              },
               {
                   name:'最新成交价',
                   type:'line',
@@ -95,14 +129,19 @@ export default {
           var axisData = (new Date()).toLocaleTimeString().replace(/^\D*/,'');
 
           var data0 = option.series[0].data;
+          // var data1 = option.series[1].data;
           data0.shift();
-          data0.push((Math.random() * 10 + 5).toFixed(1) - 0);
+          data0.push(Math.round(Math.random() * 1000));
+          // data1.shift();
+          // data1.push((Math.random() * 10 + 5).toFixed(1) - 0);
 
           option.xAxis[0].data.shift();
           option.xAxis[0].data.push(axisData);
+          // option.xAxis[1].data.shift();
+          // option.xAxis[1].data.push(app.count++);
 
           myChart.setOption(option);
-      }, 1000);
+      }, 21000000);
 
     }
   },
